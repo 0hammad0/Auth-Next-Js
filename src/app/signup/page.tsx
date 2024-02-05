@@ -16,16 +16,24 @@ export default function signUpPage() {
   const [buttonDisabled, setButtonDisabled] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  const notify = () => toast.success("Here is your toast.");
+
   const onSignUp = async () => {
     try {
       setLoading(true);
-      const response = await axios.post("/api/users/signup", user);
-      console.log("SignUp success", response.data);
-      router.push("/login");
-    } catch (error: any) {
-      console.log("SignUp failed", error.message);
 
-      toast.error(error.message);
+      const response = await axios.post("/api/users/signup", user);
+
+      if (response.status === 200 || response.status === 201) {
+        toast.success("Signup successful!");
+        router.push("/login");
+      } else {
+        toast.error("Unexpected error during signup.");
+      }
+    } catch (error: any) {
+      console.error("Signup failed", error.message);
+
+      toast.error(error.message || "An error occurred during signup.");
     } finally {
       setLoading(false);
     }
@@ -74,12 +82,23 @@ export default function signUpPage() {
         onChange={(e) => setUser({ ...user, password: e.target.value })}
         placeholder="password"
       />
-      <button
-        onClick={onSignUp}
-        className="p-2 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:border-gray-600"
-      >
-        {buttonDisabled ? "No signup" : "Signup"}
-      </button>
+      {buttonDisabled ? (
+        <button
+          className="p-2 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:border-gray-600"
+          onClick={notify}
+        >
+          {" "}
+          Fill all fields{" "}
+        </button>
+      ) : (
+        <button
+          onClick={onSignUp}
+          className="p-2 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:border-gray-600"
+        >
+          Sign up
+        </button>
+      )}
+
       <Link href="/login">Visit login page</Link>
     </div>
   );
