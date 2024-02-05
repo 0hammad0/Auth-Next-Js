@@ -4,9 +4,9 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
-import { toast } from "react-hot-toast";
+import toast from "react-hot-toast";
 
-export default function signUpPage() {
+export default function SignUpPage() {
   const router = useRouter();
   const [user, setUser] = useState({
     email: "",
@@ -16,7 +16,14 @@ export default function signUpPage() {
   const [buttonDisabled, setButtonDisabled] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const notify = () => toast.success("Here is your toast.");
+  const notify = () => toast.error("Fill all the fields");
+
+  const promiseNotify = () =>
+    toast.promise(onSignUp(), {
+      loading: "Signing up...",
+      success: "Signup successful!",
+      error: "An error occurred during signup.",
+    });
 
   const onSignUp = async () => {
     try {
@@ -25,15 +32,13 @@ export default function signUpPage() {
       const response = await axios.post("/api/users/signup", user);
 
       if (response.status === 200 || response.status === 201) {
-        toast.success("Signup successful!");
         router.push("/login");
       } else {
-        toast.error("Unexpected error during signup.");
+        throw new Error("An error occurred during login.");
       }
     } catch (error: any) {
+      throw new Error("An error occurred during login.");
       console.error("Signup failed", error.message);
-
-      toast.error(error.message || "An error occurred during signup.");
     } finally {
       setLoading(false);
     }
@@ -92,7 +97,7 @@ export default function signUpPage() {
         </button>
       ) : (
         <button
-          onClick={onSignUp}
+          onClick={promiseNotify}
           className="p-2 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:border-gray-600"
         >
           Sign up

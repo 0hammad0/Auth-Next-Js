@@ -9,21 +9,38 @@ import { useRouter } from "next/navigation";
 export default function ProfilePage() {
   const router = useRouter();
   const [data, setData] = useState("nothing");
+
+  const promiseNotify = () =>
+    toast.promise(logout(), {
+      loading: "Logging out...",
+      success: "Logged out successful!",
+      error: "An error occurred during logging out.",
+    });
+
+  const promiseNotifyGetUserDetail = () =>
+    toast.promise(getUserDetails(), {
+      loading: "Getting user details",
+      success: "Got the details successful!",
+      error: "An error occurred during getting details.",
+    });
+
   const logout = async () => {
     try {
       await axios.get("/api/users/logout");
-      toast.success("Logout successful");
       router.push("/login");
     } catch (error: any) {
       console.log(error.message);
-      toast.error(error.message);
+      throw new Error("An error occurred during login.");
     }
   };
 
   const getUserDetails = async () => {
-    const res = await axios.get("/api/users/me");
-    console.log(res.data);
-    setData(res.data.data._id);
+    try {
+      const res = await axios.get("/api/users/userDetail");
+      setData(res.data.data._id);
+    } catch (error) {
+      throw new Error("An error occurred during getting details.");
+    }
   };
 
   return (
@@ -40,14 +57,14 @@ export default function ProfilePage() {
       </h2>
       <hr />
       <button
-        onClick={logout}
+        onClick={promiseNotify}
         className="bg-blue-500 mt-4 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
       >
         Logout
       </button>
 
       <button
-        onClick={getUserDetails}
+        onClick={promiseNotifyGetUserDetail}
         className="bg-green-800 mt-4 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
       >
         GetUser Details
